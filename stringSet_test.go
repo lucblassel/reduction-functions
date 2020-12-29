@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestIsEqual(t *testing.T) {
+func TestStringSet_IsEqual(t *testing.T) {
 	var tests = []struct {
 		name       string
 		set1, set2 StringSet
@@ -39,7 +39,7 @@ func TestIsEqual(t *testing.T) {
 	}
 }
 
-func TestMakeSets(t *testing.T) {
+func TestMakeSet(t *testing.T) {
 	var tests = []struct {
 		name     string
 		elements []string
@@ -64,7 +64,7 @@ func TestMakeSets(t *testing.T) {
 	}
 }
 
-func TestSetIntersection(t *testing.T) {
+func TestStringSet_Intersection(t *testing.T) {
 	var tests = []struct {
 		name               string
 		set1, set2, wanted StringSet
@@ -110,7 +110,7 @@ func TestSetIntersection(t *testing.T) {
 	}
 }
 
-func TestSetUnion(t *testing.T) {
+func TestStringSet_Union(t *testing.T) {
 	var tests = []struct {
 		name               string
 		set1, set2, wanted StringSet
@@ -153,5 +153,14 @@ func TestSetUnion(t *testing.T) {
 				t.Errorf("%s not equal to %s", ans.ToString(), testCase.wanted.ToString())
 			}
 		})
+	}
+}
+
+func BenchmarkStringSet_Intersection(b *testing.B) {
+	seqs, _ := ParseFasta("test.fasta")
+	kmers1, _ := Kmerize(seqs["Seq01"], 5)
+	kmers2, _ := Kmerize(seqs["Seq02"], 5)
+	for i := 0; i < b.N; i++ {
+		kmers1.Intersection(kmers2)
 	}
 }

@@ -9,9 +9,9 @@ import (
 type StringSet map[string]bool
 
 // MakeSet makes a set out of a slice of strings
-func MakeSet(seqs []string) StringSet {
+func MakeSet(sequences []string) StringSet {
 	set := StringSet{}
-	for _, seq := range seqs {
+	for _, seq := range sequences {
 		set[seq] = true
 	}
 	return set
