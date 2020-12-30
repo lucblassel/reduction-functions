@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -156,6 +157,14 @@ func TestStringSet_Union(t *testing.T) {
 				t.Errorf("%s not equal to %s", ans.ToString(), testCase.wanted.ToString())
 			}
 		})
+	}
+}
+
+func TestStringSet_ToString(t *testing.T) {
+	set := MakeSet([]string{"AAA", "GGG", "TTT"})
+	wanted := fmt.Sprintf("Set{AAA,GGG,TTT,(3)}")
+	if ans := set.ToString(); ans != wanted {
+		t.Errorf("Wanted: %v\n got: %v", wanted, ans)
 	}
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -59,9 +60,17 @@ func (set1 StringSet) IsEqual(set2 StringSet) bool {
 func (set1 StringSet) ToString() string {
 	var sb strings.Builder
 	sb.WriteString("Set{")
+	keys := make([]string, len(set1))
+	i := 0
 	for k := range set1 {
-		sb.WriteString(k + ",")
+		keys[i] = k
+		i++
 	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		sb.WriteString(key + ",")
+	}
+
 	sb.WriteString(fmt.Sprintf("(%d)}", len(set1)))
 	return sb.String()
 }
