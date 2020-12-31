@@ -1,4 +1,4 @@
-package main
+package reductions
 
 import (
 	"testing"
@@ -53,9 +53,9 @@ func TestSumDistance(t *testing.T) {
 		{
 			name: "WithRecords",
 			records: []DistanceRecord{
-				{key1: "k1", key2: "k2", distance: 1.0},
-				{key1: "k1", key2: "k2", distance: 2.0},
-				{key1: "k1", key2: "k2", distance: 3.0},
+				{Key1: "k1", Key2: "k2", RawDistance: 1.0},
+				{Key1: "k1", Key2: "k2", RawDistance: 2.0},
+				{Key1: "k1", Key2: "k2", RawDistance: 3.0},
 			},
 			wanted: 6.0,
 		},
@@ -69,52 +69,80 @@ func TestSumDistance(t *testing.T) {
 	}
 }
 
-func TestComputePhiTerm(t *testing.T) {
-	k := 3
-
-	seqs := map[string]string{
-		"seq1": "ATTTGAGCA",
-		"seq2": "ATTTGAGTC",
-		"seq3": "ATTTGCAGT",
-		"seq4": "ATTTGCCAG",
-	}
-	set := []DistanceRecord{
-		{key1: "seq1", key2: "seq2", distance: 0.8},
-		{key1: "seq3", key2: "seq4", distance: 0.4},
-	}
-
-	tests := []struct {
-		name    string
-		wanted  []DistanceRecord
-		routine func(DistanceRecord, string, string, int, chan DistanceRecord)
+func TestSumArray(t *testing.T) {
+	tests := []struct{
+		name string
+		slice []float64
+		wanted float64
 	}{
 		{
-			name: "Close",
-			wanted: []DistanceRecord{
-				{"seq1", "seq2", 0.4444444444444444},
-				{"seq3", "seq4", 0.375},
-			},
-			routine: CloseDistanceRoutine,
+			name: "Empty",
+			slice: []float64{},
+			wanted: 0,
 		},
 		{
-			name: "Close",
-			wanted: []DistanceRecord{
-				{"seq1", "seq2", 0.5555555555555555},
-				{"seq3", "seq4", 0.9375},
-			},
-			routine: FarDistanceRoutine,
+			name: "Full",
+			slice: []float64{1, 2, 3},
+			wanted: 6,
 		},
 	}
 
 	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-
-			distances := ComputePhiTerm(seqs, set, k, testCase.routine)
-
-			if !AreDistanceRecordSlicesEqual(testCase.wanted, distances) {
-				t.Errorf("wanted: %v\ngot: %v", testCase.wanted, distances)
+		t.Run(testCase.name, func(t *testing.T){
+			if ans := SumArray(testCase.slice); ans != testCase.wanted {
+				t.Errorf("wanted %v, got %v", testCase.wanted, ans)
 			}
-
 		})
+	}
+}
+
+func areSlicesEqual(a, b []float64) bool {
+	if len(a) != len(b) { return false }
+	for i := range a {
+		if a[i] != a[i] { return false }
+	}
+	return true
+}
+
+func TestComputeCloseTerms(t *testing.T) {
+	records := []DistanceRecord{
+		{Key1: "k1", Key2: "k2", ReducedDistance: 1},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 2},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 3},
+	}
+	wanted := []float64{1,2,3}
+	ans := ComputeCloseTerms(records)
+	if ! areSlicesEqual(wanted, ans) {
+		t.Errorf("wanted %v got %v", wanted, ans)
+	}
+}
+
+func TestComputeFarRatios(t *testing.T) {
+	records := []DistanceRecord{
+		{Key1: "k1", Key2: "k2", ReducedDistance: 1, RawDistance: 2},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 2, RawDistance: 2},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 3, RawDistance: 2},
+	}
+	wanted := []float64{0.5,1,1.5}
+
+	ans := ComputeFarRatios(records)
+	if ! areSlicesEqual(wanted, ans) {
+		t.Errorf("wanted %v got %v", wanted, ans)
+	}
+}
+
+func TestComputeFarTerms(t *testing.T) {
+	records := []DistanceRecord{
+		{Key1: "k1", Key2: "k2", ReducedDistance: 1, RawDistance: 2},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 2, RawDistance: 2},
+		{Key1: "k1", Key2: "k2", ReducedDistance: 3, RawDistance: 2},
+	}
+
+	wanted := []float64{0, 1, 4}
+
+	farRatios := ComputeFarRatios(records)
+	ans := ComputeFarTerms(farRatios, 1)
+	if ! areSlicesEqual(wanted, ans) {
+		t.Errorf("wanted %v got %v", wanted, ans)
 	}
 }

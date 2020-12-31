@@ -1,4 +1,4 @@
-package main
+package reductions
 
 import (
 	"fmt"
@@ -56,8 +56,8 @@ func (set1 StringSet) IsEqual(set2 StringSet) bool {
 	return true
 }
 
-// ToString returns a string readable string representation of a set
-func (set1 StringSet) ToString() string {
+// String returns a string readable string representation of a set
+func (set1 StringSet) String() string {
 	var sb strings.Builder
 	sb.WriteString("Set{")
 	keys := make([]string, len(set1))

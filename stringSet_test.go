@@ -1,4 +1,4 @@
-package main
+package reductions
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func TestMakeSet(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			ans := MakeSet(testCase.elements)
 			if !ans.IsEqual(testCase.wanted) {
-				t.Errorf("%s not equal to %s", ans.ToString(), testCase.wanted.ToString())
+				t.Errorf("%s not equal to %s", ans.String(), testCase.wanted.String())
 			}
 		})
 	}
@@ -59,7 +59,7 @@ func TestStringSet_IsEqual(t *testing.T) {
 			if ans != testCase.wanted {
 				t.Errorf(
 					"got equal=%v, wanted %v for sets:%s and %s",
-					ans, testCase.wanted, testCase.set1.ToString(), testCase.set2.ToString(),
+					ans, testCase.wanted, testCase.set1.String(), testCase.set2.String(),
 				)
 			}
 		})
@@ -107,7 +107,7 @@ func TestStringSet_Intersection(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			ans := testCase.set1.Intersection(testCase.set2)
 			if !ans.IsEqual(testCase.wanted) {
-				t.Errorf("%s not equal to %s", ans.ToString(), testCase.wanted.ToString())
+				t.Errorf("%s not equal to %s", ans.String(), testCase.wanted.String())
 			}
 		})
 	}
@@ -154,16 +154,16 @@ func TestStringSet_Union(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			ans := testCase.set1.Union(testCase.set2)
 			if !ans.IsEqual(testCase.wanted) {
-				t.Errorf("%s not equal to %s", ans.ToString(), testCase.wanted.ToString())
+				t.Errorf("%s not equal to %s", ans.String(), testCase.wanted.String())
 			}
 		})
 	}
 }
 
-func TestStringSet_ToString(t *testing.T) {
+func TestStringSet_String(t *testing.T) {
 	set := MakeSet([]string{"AAA", "GGG", "TTT"})
 	wanted := fmt.Sprintf("Set{AAA,GGG,TTT,(3)}")
-	if ans := set.ToString(); ans != wanted {
+	if ans := set.String(); ans != wanted {
 		t.Errorf("Wanted: %v\n got: %v", wanted, ans)
 	}
 }

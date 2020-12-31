@@ -1,4 +1,4 @@
-package main
+package reductions
 
 import (
 	"testing"
@@ -78,7 +78,7 @@ func TestKmerize(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			ans, _ := Kmerize(testCase.seq, testCase.k)
 			if !ans.IsEqual(testCase.wanted) {
-				t.Errorf("%s (got)\n%s (wanted)", ans.ToString(), testCase.wanted.ToString())
+				t.Errorf("%s (got)\n%s (wanted)", ans.String(), testCase.wanted.String())
 			}
 		})
 	}
