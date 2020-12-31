@@ -11,15 +11,15 @@ import (
 
 // DistanceRecord keeps the distance between 2 sequences with the given keys
 type DistanceRecord struct {
-	Key1, Key2 string
-	RawDistance, ReducedDistance   float64
+	Key1, Key2                   string
+	RawDistance, ReducedDistance float64
 }
 
 func (record DistanceRecord) String() string {
 	return fmt.Sprintf(
 		"{%v,%v: %0.3f, %0.3f}",
 		record.Key1, record.Key2, record.RawDistance, record.ReducedDistance,
-		)
+	)
 }
 
 func sortRecordKeys(record DistanceRecord) DistanceRecord {
@@ -27,10 +27,10 @@ func sortRecordKeys(record DistanceRecord) DistanceRecord {
 		return record
 	}
 	return DistanceRecord{
-		Key1:record.Key2,
-		Key2:record.Key1,
-		RawDistance:record.RawDistance,
-		ReducedDistance:record.ReducedDistance,
+		Key1:            record.Key2,
+		Key2:            record.Key1,
+		RawDistance:     record.RawDistance,
+		ReducedDistance: record.ReducedDistance,
 	}
 }
 
@@ -103,7 +103,7 @@ func KmerizedJaccardDistance(seq1, seq2 string, k int) (float64, error) {
 }
 
 // GetDistances computes distances between all pairs of strings in a list
-func GetDistances(seqRecords map[string]string, k int, reduction func(string)string) []DistanceRecord {
+func GetDistances(seqRecords map[string]string, k int, reduction func(string) string) []DistanceRecord {
 	seqKeys := make([]string, 0, len(seqRecords))
 	for key := range seqRecords {
 		seqKeys = append(seqKeys, key)
@@ -120,9 +120,9 @@ func GetDistances(seqRecords map[string]string, k int, reduction func(string)str
 			rawDist, _ := KmerizedJaccardDistance(seqRecords[key1], seqRecords[key2], k)
 			redDist, _ := KmerizedJaccardDistance(reduction(seqRecords[key1]), reduction(seqRecords[key2]), k)
 			queue <- DistanceRecord{
-				Key1:     key1,
-				Key2:     key2,
-				RawDistance: rawDist,
+				Key1:            key1,
+				Key2:            key2,
+				RawDistance:     rawDist,
 				ReducedDistance: redDist,
 			}
 		}(elements[0], elements[1])
@@ -155,7 +155,6 @@ func MakeSequenceSets(distances []DistanceRecord, radius float64) ([]DistanceRec
 	}
 	return closeSet, farSet
 }
-
 
 // MakeWFASequenceSets generates a "close" and a "far" sequence set from the WFA generate_dataset sequences
 func MakeWFASequenceSets(distances []DistanceRecord) ([]DistanceRecord, []DistanceRecord) {

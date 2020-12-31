@@ -29,14 +29,13 @@ func Identity(read string) string {
 
 // PhiRecord
 type PhiRecord struct {
-	phi, C, F, mu float64
+	Phi, C, F, Mu float64
 }
-
 
 func (record PhiRecord) String() string {
 	return fmt.Sprintf(
 		"{phi: %.4e,C: %.4e,F: %.4e,mu: %.4e}",
-		record.phi, record.C, record.F, record.mu,
+		record.Phi, record.C, record.F, record.Mu,
 	)
 }
 
@@ -51,7 +50,7 @@ func ComputeFarRatios(farSet []DistanceRecord) []float64 {
 func ComputeFarTerms(farRatios []float64, mu float64) []float64 {
 	terms := make([]float64, len(farRatios))
 	for i := range farRatios {
-		terms[i] = math.Pow(farRatios[i] - mu, 2)
+		terms[i] = math.Pow(farRatios[i]-mu, 2)
 	}
 	return terms
 }
@@ -81,9 +80,9 @@ func ObjectivePhi(closeSet, farSet []DistanceRecord) PhiRecord {
 	F := SumArray(ComputeFarTerms(farRatios, mu)) / float64(len(farRatios))
 
 	return PhiRecord{
-		phi: C + F/mu,
+		Phi: C + F/mu,
 		C:   C,
 		F:   F,
-		mu:  mu,
+		Mu:  mu,
 	}
 }

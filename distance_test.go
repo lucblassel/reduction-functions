@@ -181,14 +181,13 @@ func TestDistanceRecord_IsEqual(t *testing.T) {
 	}
 }
 
-
 func TestMakeWFASequenceSets(t *testing.T) {
 	distances := []DistanceRecord{
-		{Key1:"key1", Key2:"key1_err"},
-		{Key1:"key2", Key2:"key2_err"},
-		{Key1:"key2", Key2:"key1_err"},
-		{Key1:"key4", Key2:"key3_err"},
-		{Key1:"key3", Key2:"key4_err"},
+		{Key1: "key1", Key2: "key1_err"},
+		{Key1: "key2", Key2: "key2_err"},
+		{Key1: "key2", Key2: "key1_err"},
+		{Key1: "key4", Key2: "key3_err"},
+		{Key1: "key3", Key2: "key4_err"},
 	}
 	closeSet, farSet := MakeWFASequenceSets(distances)
 
