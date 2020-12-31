@@ -4,21 +4,17 @@ import (
 	"testing"
 )
 
-func BenchmarkGetDistances(b *testing.B) {
-	sequences, _ := ParseFasta("test.fasta")
-	benches := []struct {
-		name      string
-		reduction func(string) string
-	}{
-		{"Identity", Identity},
-		{"Homopolymer", HomopolymerCompression},
+func BenchmarkGetDistancesIdentity(b *testing.B) {
+	sequences, _ := ParseFasta("test_data/seqs.fasta")
+	for i := 0; i < b.N; i++ {
+		GetDistances(sequences, 5, Identity)
 	}
-	for _, benchCase := range benches {
-		b.Run(benchCase.name, func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
-				GetDistances(sequences, 5, benchCase.reduction)
-			}
-		})
+}
+
+func BenchmarkGetDistancesHomopolymerCompression(b *testing.B) {
+	sequences, _ := ParseFasta("test_data/seqs.fasta")
+	for i := 0; i < b.N; i++ {
+		GetDistances(sequences, 5, HomopolymerCompression)
 	}
 }
 

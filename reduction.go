@@ -27,15 +27,6 @@ func Identity(read string) string {
 	return read
 }
 
-// SumDistance returns the total distance of a slice of DistanceRecords
-func SumDistance(records []DistanceRecord) float64 {
-	var totalDistance float64
-	for _, record := range records {
-		totalDistance += record.RawDistance
-	}
-	return totalDistance
-}
-
 // PhiRecord
 type PhiRecord struct {
 	phi, C, F, mu float64

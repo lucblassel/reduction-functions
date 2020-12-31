@@ -39,36 +39,6 @@ func TestHomopolymerCompression(t *testing.T) {
 	}
 }
 
-func TestSumDistance(t *testing.T) {
-	tests := []struct {
-		name    string
-		records []DistanceRecord
-		wanted  float64
-	}{
-		{
-			name:    "EmptySet",
-			records: []DistanceRecord{},
-			wanted:  0,
-		},
-		{
-			name: "WithRecords",
-			records: []DistanceRecord{
-				{Key1: "k1", Key2: "k2", RawDistance: 1.0},
-				{Key1: "k1", Key2: "k2", RawDistance: 2.0},
-				{Key1: "k1", Key2: "k2", RawDistance: 3.0},
-			},
-			wanted: 6.0,
-		},
-	}
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			if ans := SumDistance(testCase.records); ans != testCase.wanted {
-				t.Errorf("Wanted %v but got %v", testCase.wanted, ans)
-			}
-		})
-	}
-}
-
 func TestSumArray(t *testing.T) {
 	tests := []struct{
 		name string
