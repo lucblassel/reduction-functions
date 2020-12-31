@@ -85,7 +85,7 @@ func TestComputeCloseTerms(t *testing.T) {
 		{Key1: "k1", Key2: "k2", ReducedDistance: 3},
 	}
 	wanted := []float64{1, 2, 3}
-	ans := ComputeCloseTerms(records)
+	ans := GetReducedDistance(records)
 	if !areSlicesEqual(wanted, ans) {
 		t.Errorf("wanted %v got %v", wanted, ans)
 	}
@@ -99,7 +99,7 @@ func TestComputeFarRatios(t *testing.T) {
 	}
 	wanted := []float64{0.5, 1, 1.5}
 
-	ans := ComputeFarRatios(records)
+	ans := ComputeDistanceRatio(records)
 	if !areSlicesEqual(wanted, ans) {
 		t.Errorf("wanted %v got %v", wanted, ans)
 	}
@@ -114,8 +114,8 @@ func TestComputeFarTerms(t *testing.T) {
 
 	wanted := []float64{0, 1, 4}
 
-	farRatios := ComputeFarRatios(records)
-	ans := ComputeFarTerms(farRatios, 1)
+	farRatios := ComputeDistanceRatio(records)
+	ans := ComputeSquareDifference(farRatios, 1)
 	if !areSlicesEqual(wanted, ans) {
 		t.Errorf("wanted %v got %v", wanted, ans)
 	}

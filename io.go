@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// getLineScanner returns a line by line scanner and the corresponding file (for closing)
 func getLineScanner(path string) (*bufio.Scanner, *os.File, error) {
 	var scanner *bufio.Scanner
 	file, err := os.Open(path)

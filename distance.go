@@ -15,6 +15,7 @@ type DistanceRecord struct {
 	RawDistance, ReducedDistance float64
 }
 
+// String implements the Stringer interface for DistanceRecord structs
 func (record DistanceRecord) String() string {
 	return fmt.Sprintf(
 		"{%v,%v: %0.3f, %0.3f}",
@@ -22,6 +23,7 @@ func (record DistanceRecord) String() string {
 	)
 }
 
+// sortRecordKeys puts the keys in lexicographical order
 func sortRecordKeys(record DistanceRecord) DistanceRecord {
 	if record.Key1 < record.Key2 {
 		return record
@@ -34,6 +36,7 @@ func sortRecordKeys(record DistanceRecord) DistanceRecord {
 	}
 }
 
+// AreDistanceRecordSlicesEqual checks that 2 slices contain the same DistanceRecords
 func AreDistanceRecordSlicesEqual(a, b []DistanceRecord) bool {
 	aReord := []DistanceRecord{}
 	bReord := []DistanceRecord{}
@@ -65,7 +68,7 @@ func AreDistanceRecordSlicesEqual(a, b []DistanceRecord) bool {
 	return true
 }
 
-// Check if 2 distance records are equal
+// IsEqual checks if 2 distance records are equal
 func (record DistanceRecord) IsEqual(other DistanceRecord) bool {
 	if record.RawDistance != other.RawDistance ||
 		record.ReducedDistance != other.ReducedDistance {
