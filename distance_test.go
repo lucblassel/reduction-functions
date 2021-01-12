@@ -134,7 +134,7 @@ func TestGetDistances(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			distances := GetDistances(seqs, 3, testCase.reduction)
 			if !AreDistanceRecordSlicesEqual(testCase.wanted, distances) {
-				t.Errorf("Wanted %v got %v", testCase.wanted, distances)
+				t.Errorf("Wanted %v got %v\n(wanted length %v, got %v)", testCase.wanted, distances, len(testCase.wanted), len(distances))
 			}
 		})
 	}

@@ -2,7 +2,6 @@ package reductions
 
 import (
 	"fmt"
-	comb "github.com/mxschmitt/golang-combinations"
 	"gonum.org/v1/gonum/stat/combin"
 	"sort"
 	"strings"
@@ -112,34 +111,36 @@ func GetDistances(seqRecords map[string]string, k int, reduction func(string) st
 		seqKeys = append(seqKeys, key)
 	}
 
-	distances := make([]DistanceRecord, 0, combin.Binomial(len(seqKeys), 2))
+	nRecords := combin.Binomial(len(seqKeys), 2)
+	distances := make([]DistanceRecord, 0, nRecords)
 
 	queue := make(chan DistanceRecord, 1)
 	var wg sync.WaitGroup
 
-	for _, elements := range comb.Combinations(seqKeys, 2) {
-		wg.Add(1)
-		go func(key1, key2 string) {
-			rawDist, _ := KmerizedJaccardDistance(seqRecords[key1], seqRecords[key2], k)
-			redDist, _ := KmerizedJaccardDistance(reduction(seqRecords[key1]), reduction(seqRecords[key2]), k)
-			queue <- DistanceRecord{
-				Key1:            key1,
-				Key2:            key2,
-				RawDistance:     rawDist,
-				ReducedDistance: redDist,
-			}
-		}(elements[0], elements[1])
+	for i, key1 := range seqKeys {
+		for _, key2 := range seqKeys[i+1:] {
+			wg.Add(1)
+			go func(key1, key2 string) {
+				rawDist, _ := KmerizedJaccardDistance(seqRecords[key1], seqRecords[key2], k)
+				redDist, _ := KmerizedJaccardDistance(reduction(seqRecords[key1]), reduction(seqRecords[key2]), k)
+				queue <- DistanceRecord{
+					Key1:            key1,
+					Key2:            key2,
+					RawDistance:     rawDist,
+					ReducedDistance: redDist,
+				}
+			}(key1, key2)
+		}
 	}
 
 	go func() {
-		for record := range queue {
+		for record := range queue{
 			distances = append(distances, record)
 			wg.Done()
 		}
 	}()
 
 	wg.Wait()
-
 	return distances
 }
 
