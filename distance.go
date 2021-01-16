@@ -144,6 +144,55 @@ func GetDistances(seqRecords map[string]string, k int, reduction func(string) st
 	return distances
 }
 
+func distanceWorker(id int, jobs <- chan []string, results chan <- DistanceRecord, seqRecords map[string]string, k int, reduction func(string) string) {
+	for job := range jobs {
+		rawDist, _ := KmerizedJaccardDistance(seqRecords[job[0]], seqRecords[job[1]], k)
+		redDist, _ := KmerizedJaccardDistance(reduction(seqRecords[job[0]]), reduction(seqRecords[job[1]]), k)
+		results <- DistanceRecord{
+			Key1:            job[0],
+			Key2:            job[1],
+			RawDistance:     rawDist,
+			ReducedDistance: redDist,
+		}
+	}
+}
+
+// GetDistancesMultiThread computes distances between all pairs of strings in a list
+func GetDistancesMultiThread(seqRecords map[string]string, k int, reduction func(string) string, threads int) []DistanceRecord {
+	seqKeys := make([]string, 0, len(seqRecords))
+	for key := range seqRecords {
+		seqKeys = append(seqKeys, key)
+	}
+
+	nRecords := combin.Binomial(len(seqKeys), 2)
+	distances := make([]DistanceRecord, 0, nRecords)
+
+	if nRecords < threads {
+		threads = nRecords
+	}
+
+	results := make(chan DistanceRecord, nRecords)
+	keyChannel := make(chan []string, nRecords)
+
+	for w:=1; w<=nRecords; w++{
+		go distanceWorker(w, keyChannel, results, seqRecords, k, reduction)
+	}
+
+	for i, key1 := range seqKeys {
+		for _, key2 := range seqKeys[i+1:] {
+			keyChannel <- []string{key1, key2}
+		}
+	}
+
+	close(keyChannel)
+
+	for r:=1; r<=nRecords; r++{
+		distances = append(distances, <- results)
+	}
+
+	return distances
+}
+
 // MakeSequenceSets separates a set of sequences distances into the set of close sequences (dist <= radius)
 // and the set of far sequences (dist > radius) and returns them both
 func MakeSequenceSets(distances []DistanceRecord, radius float64) ([]DistanceRecord, []DistanceRecord) {

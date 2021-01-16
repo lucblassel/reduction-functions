@@ -132,7 +132,7 @@ func TestGetDistances(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			distances := GetDistances(seqs, 3, testCase.reduction)
+			distances := GetDistancesMultiThread(seqs, 3, testCase.reduction, 8)
 			if !AreDistanceRecordSlicesEqual(testCase.wanted, distances) {
 				t.Errorf("Wanted %v got %v\n(wanted length %v, got %v)", testCase.wanted, distances, len(testCase.wanted), len(distances))
 			}
