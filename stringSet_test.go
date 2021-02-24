@@ -169,7 +169,7 @@ func TestStringSet_String(t *testing.T) {
 }
 
 func BenchmarkStringSet_Intersection(b *testing.B) {
-	seqs, _ := ParseFasta("test.fasta")
+	seqs, _, _ := ParseFasta("test.fasta")
 	kmers1, _ := Kmerize(seqs["Seq01"], 5)
 	kmers2, _ := Kmerize(seqs["Seq02"], 5)
 	for i := 0; i < b.N; i++ {

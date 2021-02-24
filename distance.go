@@ -134,7 +134,7 @@ func GetDistances(seqRecords map[string]string, k int, reduction func(string) st
 	}
 
 	go func() {
-		for record := range queue{
+		for record := range queue {
 			distances = append(distances, record)
 			wg.Done()
 		}
@@ -144,7 +144,7 @@ func GetDistances(seqRecords map[string]string, k int, reduction func(string) st
 	return distances
 }
 
-func distanceWorker(id int, jobs <- chan []string, results chan <- DistanceRecord, seqRecords map[string]string, k int, reduction func(string) string) {
+func distanceWorker(id int, jobs <-chan []string, results chan<- DistanceRecord, seqRecords map[string]string, k int, reduction func(string) string) {
 	for job := range jobs {
 		rawDist, _ := KmerizedJaccardDistance(seqRecords[job[0]], seqRecords[job[1]], k)
 		redDist, _ := KmerizedJaccardDistance(reduction(seqRecords[job[0]]), reduction(seqRecords[job[1]]), k)
@@ -174,7 +174,7 @@ func GetDistancesMultiThread(seqRecords map[string]string, k int, reduction func
 	results := make(chan DistanceRecord, nRecords)
 	keyChannel := make(chan []string, nRecords)
 
-	for w:=1; w<=nRecords; w++{
+	for w := 1; w <= nRecords; w++ {
 		go distanceWorker(w, keyChannel, results, seqRecords, k, reduction)
 	}
 
@@ -186,8 +186,8 @@ func GetDistancesMultiThread(seqRecords map[string]string, k int, reduction func
 
 	close(keyChannel)
 
-	for r:=1; r<=nRecords; r++{
-		distances = append(distances, <- results)
+	for r := 1; r <= nRecords; r++ {
+		distances = append(distances, <-results)
 	}
 
 	return distances

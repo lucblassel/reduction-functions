@@ -5,16 +5,30 @@ import (
 )
 
 func BenchmarkGetDistancesIdentity(b *testing.B) {
-	sequences, _ := ParseFasta("test_data/seqs.fasta")
+	sequences, _, _ := ParseFasta("test_data/seqs.fasta")
 	for i := 0; i < b.N; i++ {
 		GetDistances(sequences, 5, Identity)
 	}
 }
 
 func BenchmarkGetDistancesHomopolymerCompression(b *testing.B) {
-	sequences, _ := ParseFasta("test_data/seqs.fasta")
+	sequences, _, _ := ParseFasta("test_data/seqs.fasta")
 	for i := 0; i < b.N; i++ {
 		GetDistances(sequences, 5, HomopolymerCompression)
+	}
+}
+
+func BenchmarkGetDistancesMultithreadIdentity(b *testing.B) {
+	sequences, _, _ := ParseFasta("test_data/seqs.fasta")
+	for i := 0; i < b.N; i++ {
+		GetDistancesMultiThread(sequences, 5, Identity, 4)
+	}
+}
+
+func BenchmarkGetDistancesMultithreadHomopolymerCompression(b *testing.B) {
+	sequences, _, _ := ParseFasta("test_data/seqs.fasta")
+	for i := 0; i < b.N; i++ {
+		GetDistancesMultiThread(sequences, 5, HomopolymerCompression, 4)
 	}
 }
 
@@ -103,7 +117,7 @@ func TestMakeSequenceSets(t *testing.T) {
 	}
 }
 
-func TestGetDistances(t *testing.T) {
+func TestGetDistancesMultiThread(t *testing.T) {
 
 	seqs := map[string]string{
 		"seq1": "ATTGCATCAT",
@@ -133,6 +147,43 @@ func TestGetDistances(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			distances := GetDistancesMultiThread(seqs, 3, testCase.reduction, 8)
+			if !AreDistanceRecordSlicesEqual(testCase.wanted, distances) {
+				t.Errorf("Wanted %v got %v\n(wanted length %v, got %v)", testCase.wanted, distances, len(testCase.wanted), len(distances))
+			}
+		})
+	}
+}
+
+func TestGetDistances(t *testing.T) {
+
+	seqs := map[string]string{
+		"seq1": "ATTGCATCAT",
+		"seq2": "AGTCAGGCAG",
+		"seq3": "GTCAGGCATA",
+		"seq4": "CGATGGCATA",
+	}
+	tests := []struct {
+		name      string
+		wanted    []DistanceRecord
+		reduction func(string) string
+	}{
+		{
+			name: "Identity",
+			wanted: []DistanceRecord{
+				{Key1: "seq2", Key2: "seq3", RawDistance: 0.33333333333333337, ReducedDistance: 0.33333333333333337},
+				{Key1: "seq2", Key2: "seq4", RawDistance: 0.8333333333333334, ReducedDistance: 0.8333333333333334},
+				{Key1: "seq3", Key2: "seq4", RawDistance: 0.6363636363636364, ReducedDistance: 0.6363636363636364},
+				{Key1: "seq1", Key2: "seq2", RawDistance: 0.8181818181818181, ReducedDistance: 0.8181818181818181},
+				{Key1: "seq1", Key2: "seq3", RawDistance: 0.7272727272727273, ReducedDistance: 0.7272727272727273},
+				{Key1: "seq1", Key2: "seq4", RawDistance: 0.7, ReducedDistance: 0.7},
+			},
+			reduction: Identity,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			distances := GetDistances(seqs, 3, testCase.reduction)
 			if !AreDistanceRecordSlicesEqual(testCase.wanted, distances) {
 				t.Errorf("Wanted %v got %v\n(wanted length %v, got %v)", testCase.wanted, distances, len(testCase.wanted), len(distances))
 			}
