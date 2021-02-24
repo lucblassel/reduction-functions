@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -13,8 +14,8 @@ import (
 // nStart elements to a set of nEnd elements
 func CountSurjections(nStart, nEnd int) int {
 	res := 0
-	for k:=0; k<=nEnd; k++ {
-		sign := int(math.Pow(-1, float64(nEnd - k)))
+	for k := 0; k <= nEnd; k++ {
+		sign := int(math.Pow(-1, float64(nEnd-k)))
 		combs := combin.Binomial(nEnd, k)
 		power := int(math.Pow(float64(k), float64(nStart)))
 		res += sign * combs * power
@@ -23,13 +24,13 @@ func CountSurjections(nStart, nEnd int) int {
 }
 
 // RandomMapping returns a random mapping from a input set to an output set
-func RandomMapping(nStart, nEnd int) []int{
-		rand.Seed(time.Now().UnixNano())
-		choices := make([]int, nStart)
-		for i:=0; i < nStart; i++ {
-			choices[i] = rand.Intn(nEnd)
-		}
-		return choices
+func RandomMapping(nStart, nEnd int) []int {
+	rand.Seed(time.Now().UnixNano())
+	choices := make([]int, nStart)
+	for i := 0; i < nStart; i++ {
+		choices[i] = rand.Intn(nEnd)
+	}
+	return choices
 }
 
 // Surjection returns a random surjection from an input set into an output set
@@ -40,15 +41,15 @@ func Surjection(nStart, nEnd int) ([]int, error) {
 	rand.Seed(time.Now().UnixNano())
 	choices := make([]int, nStart)
 	chosen := make([]bool, nStart)
-	for i:=0; i<nEnd; i++ {
-		pos:=rand.Intn(nStart)
+	for i := 0; i < nEnd; i++ {
+		pos := rand.Intn(nStart)
 		for chosen[pos] {
-			pos=rand.Intn(nStart)
+			pos = rand.Intn(nStart)
 		}
 		choices[pos] = i
 		chosen[pos] = true
 	}
-	for i:=0; i<nStart; i++ {
+	for i := 0; i < nStart; i++ {
 		if chosen[i] {
 			continue
 		}
@@ -66,7 +67,7 @@ func GetTuples(n, depth int, universe string, samples []string) []string {
 	output := make([]string, 0)
 	for _, elem := range samples {
 		for _, char := range universe {
-			output = append(output, elem + string(char))
+			output = append(output, elem+string(char))
 		}
 	}
 	if len(samples) == 0 {
@@ -78,7 +79,7 @@ func GetTuples(n, depth int, universe string, samples []string) []string {
 }
 
 // GetRandomReduction generates a random surjection between a set of input and output sequences
-func GetRandomReduction(inputAlphabet, outputAlphabet  string, inputSize, outputSize int) (map[string]string, error){
+func GetRandomReduction(inputAlphabet, outputAlphabet string, inputSize, outputSize int) (map[string]string, error) {
 	inputPerms := GetTuples(inputSize, 0, inputAlphabet, []string{})
 	outputPerms := GetTuples(outputSize, 0, outputAlphabet, []string{})
 	sort.Strings(inputPerms)
@@ -92,4 +93,26 @@ func GetRandomReduction(inputAlphabet, outputAlphabet  string, inputSize, output
 		function[inputPerms[inIdx]] = outputPerms[outIdx]
 	}
 	return function, nil
+}
+
+// MakeReductionFunction create a reduction function from a mapping
+func MakeReductionFunction(surjection map[string]string) func(string) string {
+	return func(read string) string {
+		var order int
+		for k := range surjection {
+			order = len(k)
+			break
+		}
+
+		var builder strings.Builder
+		builder.WriteString(read[0 : order-1])
+		for i := 0; i <= len(read)-order; i++ {
+			s := surjection[read[i:i+order]]
+			if s == "." {
+				continue
+			}
+			builder.WriteString(s)
+		}
+		return builder.String()
+	}
 }

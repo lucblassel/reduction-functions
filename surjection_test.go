@@ -86,17 +86,17 @@ func TestCountSurjections(t *testing.T) {
 
 func TestGetTuples(t *testing.T) {
 	alphabet := "ATGC"
-	cases := []struct{
+	cases := []struct {
 		name, universe string
-		n int
-		wanted []string
+		n              int
+		wanted         []string
 	}{
-		{name: "simplest", universe: alphabet, n: 1, wanted:[]string{"A", "C", "G", "T"}},
+		{name: "simplest", universe: alphabet, n: 1, wanted: []string{"A", "C", "G", "T"}},
 		{
-			name: "length2",
+			name:     "length2",
 			universe: alphabet,
-			n: 2,
-			wanted:[]string{
+			n:        2,
+			wanted: []string{
 				"AA", "AC", "AG", "AT",
 				"CA", "CC", "CG", "CT",
 				"GA", "GC", "GG", "GT",
@@ -104,10 +104,10 @@ func TestGetTuples(t *testing.T) {
 			},
 		},
 		{
-			name: "length3",
+			name:     "length3",
 			universe: alphabet,
-			n: 3,
-			wanted:[]string{
+			n:        3,
+			wanted: []string{
 				"AAA", "AAC", "AAG", "AAT",
 				"ACA", "ACC", "ACG", "ACT",
 				"AGA", "AGC", "AGG", "AGT",
@@ -128,7 +128,7 @@ func TestGetTuples(t *testing.T) {
 		},
 	}
 	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T){
+		t.Run(testCase.name, func(t *testing.T) {
 			perms := GetTuples(testCase.n, 0, testCase.universe, []string{})
 			sort.Strings(perms)
 			if len(perms) != len(testCase.wanted) {
@@ -146,19 +146,19 @@ func TestGetTuples(t *testing.T) {
 
 func TestGetRandomReduction(t *testing.T) {
 	inAlph, outAlph := "ATGC", "ATGC."
-	cases := []struct{
+	cases := []struct {
 		name, inAlph, outAlph string
-		inSize, outSize int
+		inSize, outSize       int
 	}{
 		{
-			name:"2->1", inAlph: inAlph, outAlph: outAlph, inSize: 2, outSize: 1,
+			name: "2->1", inAlph: inAlph, outAlph: outAlph, inSize: 2, outSize: 1,
 		},
 		{
-			name:"3->2", inAlph: inAlph, outAlph: outAlph, inSize: 3, outSize: 2,
+			name: "3->2", inAlph: inAlph, outAlph: outAlph, inSize: 3, outSize: 2,
 		},
 	}
 	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T){
+		t.Run(testCase.name, func(t *testing.T) {
 			function, err := GetRandomReduction(testCase.inAlph, testCase.outAlph, testCase.inSize, testCase.outSize)
 			if err != nil {
 				t.Errorf("error while getting reduction function: %v", err)
@@ -168,12 +168,65 @@ func TestGetRandomReduction(t *testing.T) {
 				t.Errorf("Mismatched lengths expected %v got %v", nCases, len(function))
 			}
 			outputs := map[string]bool{}
-			for _,v := range function{
+			for _, v := range function {
 				outputs[v] = true
 			}
 			nOuts := math.Pow(float64(len(testCase.outAlph)), float64(testCase.outSize))
 			if len(outputs) != int(nOuts) {
 				t.Errorf("Not a surjection, got %v outupts wanted %v", nOuts, len(outputs))
+			}
+		})
+	}
+}
+
+func TestMakeReductionFunction(t *testing.T) {
+	cases := []struct {
+		name      string
+		reduction map[string]string
+		input     string
+		wanted    string
+	}{
+		{
+			name: "empty",
+			reduction: map[string]string{
+				"AA": ".", "AC": ".", "AG": ".", "AT": ".",
+				"CA": ".", "CC": ".", "CG": ".", "CT": ".",
+				"GA": ".", "GC": ".", "GG": ".", "GT": ".",
+				"TA": ".", "TC": ".", "TG": ".", "TT": ".",
+			},
+			input:  "GATGCCAGTGCAGCATGTCAGGACGAC",
+			wanted: "G",
+		},
+		{
+			name: "homopolymer",
+			reduction: map[string]string{
+				"AA": ".", "AC": "C", "AG": "G", "AT": "T",
+				"CA": "A", "CC": ".", "CG": "G", "CT": "T",
+				"GA": "A", "GC": "C", "GG": ".", "GT": "T",
+				"TA": "A", "TC": "C", "TG": "G", "TT": ".",
+			},
+			input:  "AAAAATTTTTTTGGGGGGCCCCCAAAAAATTTTTTGGGGGGGCCCCCCC",
+			wanted: "ATGCATGC",
+		},
+		{
+			name: "first letter",
+			reduction: map[string]string{
+				"AA": "A", "AC": "A", "AG": "A", "AT": "A",
+				"CA": "C", "CC": "C", "CG": "C", "CT": "C",
+				"GA": "G", "GC": "G", "GG": "G", "GT": "G",
+				"TA": "T", "TC": "T", "TG": "T", "TT": "T",
+			},
+			input:  "AGTCAGA",
+			wanted: "AAGTCAG",
+		},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			reduction := MakeReductionFunction(testCase.reduction)
+			output := reduction(testCase.input)
+			if output != testCase.wanted {
+				t.Errorf("Error in making reduction function.\nWanted %v\nGot: %v", testCase.wanted, output)
 			}
 		})
 	}
