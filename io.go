@@ -37,6 +37,7 @@ func ParseFasta(path string) (map[string]string, []string, error) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		fmt.Println("parsing line", line[:10], "...")
 		if rune(line[0]) == '>' {
 			if key != "" {
 				sequences[key] = sequence
@@ -44,6 +45,8 @@ func ParseFasta(path string) (map[string]string, []string, error) {
 			}
 			key = strings.TrimSpace(line[1:])
 			order = append(order, key)
+		} else if strings.TrimSpace(line) == "" {
+			continue
 		} else {
 			sequence += line
 		}
@@ -60,7 +63,7 @@ func ParseFasta(path string) (map[string]string, []string, error) {
 
 // write a single sequence with ID to fasta file
 func writeSequence(file *os.File, name , sequence string) error {
-	_, err := file.WriteString(fmt.Sprintf("> %s\n", name))
+	_, err := file.WriteString(fmt.Sprintf(">%s\n", name))
 	if err != nil {
 		return err
 	}

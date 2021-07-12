@@ -2,12 +2,14 @@ package reductions
 
 import (
 	"errors"
+	"fmt"
 	"gonum.org/v1/gonum/stat/combin"
 	"math"
 	"math/rand"
 	"sort"
 	"strings"
 	"time"
+	"github.com/hillbig/rsdic"
 )
 
 // CountSurjections counts the number of surjections from a set of
@@ -114,5 +116,76 @@ func MakeReductionFunction(surjection map[string]string) func(string) string {
 			builder.WriteString(s)
 		}
 		return builder.String()
+	}
+}
+
+// MakeReductionFunctionKeepOffsets create a reduction function from a mapping
+func MakeReductionFunctionKeepOffsets(surjection map[string]string) func(string) (string, string) {
+	return func(read string) (string, string) {
+		var order int
+		for k := range surjection {
+			order = len(k)
+			break
+		}
+
+		var builder strings.Builder
+		encoded := ""
+		op, count := "M", order-1
+
+		builder.WriteString(read[0 : order-1])
+
+		for i := 0; i <= len(read)-order; i++ {
+			s := surjection[read[i:i+order]]
+			if s == "." {
+				if op == "M" {
+					encoded += fmt.Sprintf("M%d", count)
+					count = 0
+					op = "D"
+				}
+				count++
+				continue
+			}
+			if op == "D" {
+				encoded += fmt.Sprintf("D%d", count)
+				count = 0
+				op = "M"
+			}
+			count++
+			builder.WriteString(s)
+		}
+		encoded += fmt.Sprintf("%s%d", op, count)
+
+		return builder.String(), encoded
+	}
+}
+
+
+// MakeReductionFunctionBitVector create a reduction function from a mapping
+func MakeReductionFunctionBitVector(surjection map[string]string) func(string) (string, *rsdic.RSDic) {
+	return func(read string) (string, *rsdic.RSDic) {
+		var order int
+		for k := range surjection {
+			order = len(k)
+			break
+		}
+		offsets := rsdic.New()
+
+		for i:=0; i<order-1; i++ {
+			offsets.PushBack(true)
+		}
+
+		var builder strings.Builder
+		builder.WriteString(read[0 : order-1])
+		for i := 0; i <= len(read)-order; i++ {
+			s := surjection[read[i:i+order]]
+			if s == "." {
+				offsets.PushBack(false)
+				continue
+			} else {
+				offsets.PushBack(true)
+			}
+			builder.WriteString(s)
+		}
+		return builder.String(), offsets
 	}
 }

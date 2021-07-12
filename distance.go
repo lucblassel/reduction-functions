@@ -215,8 +215,8 @@ func MakeWFASequenceSets(distances []DistanceRecord) ([]DistanceRecord, []Distan
 	farSet := []DistanceRecord{}
 
 	for _, record := range distances {
-		if strings.ReplaceAll(record.Key1, "_err", "") ==
-			strings.ReplaceAll(record.Key2, "_err", "") {
+		if strings.Replace(record.Key1, "_err", "", -1) ==
+			strings.Replace(record.Key2, "_err", "", -1) {
 			closeSet = append(closeSet, record)
 		} else {
 			farSet = append(farSet, record)
