@@ -133,7 +133,6 @@ func MakeReductionFunctionDeleteAmbs(surjection map[string]string) func(string) 
 		for i := 0; i <= len(read)-order; i++ {
 			s := surjection[read[i:i+order]]
 			if s == "." || s == "" {
-				fmt.Println(s, read[i:i+order])
 				continue
 			}
 			builder.WriteString(s)
@@ -232,7 +231,6 @@ func MakeReductionFunctionBitVectorDeleteAmbs(surjection map[string]string) func
 		for i := 0; i <= len(read)-order; i++ {
 			s := surjection[read[i:i+order]]
 			if s == "." || s == "" {
-				fmt.Println(s, read[i:i+order])
 				offsets.PushBack(false)
 				continue
 			} else {
